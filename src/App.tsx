@@ -17,10 +17,24 @@ import { SettingsPage } from "@/pages/SettingsPage"
 import { SearchPage } from "@/pages/SearchPage"
 import { NotFoundPage } from "@/pages/NotFoundPage"
 
+const ROUTER_BASENAME = (() => {
+  const src = Array.from(document.querySelectorAll("script[src]"))
+    .map((s) => s.getAttribute("src") ?? "")
+    .find((s) => s.includes("/assets/"))
+  if (!src) return ""
+  try {
+    const url = new URL(src, window.location.href)
+    const idx = url.pathname.lastIndexOf("/assets/")
+    return idx > 0 ? url.pathname.slice(0, idx) : ""
+  } catch {
+    return ""
+  }
+})()
+
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={ROUTER_BASENAME}>
         <Routes>
           <Route element={<PublicOnlyRoute />}>
             <Route path="/login" element={<LoginPage />} />
