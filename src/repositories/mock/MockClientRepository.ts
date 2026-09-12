@@ -12,7 +12,6 @@ function toStoredClient(id: string, input: ClientInput): Client {
   return {
     ...input,
     id,
-    dateAdded: new Date().toISOString().slice(0, 10),
   }
 }
 

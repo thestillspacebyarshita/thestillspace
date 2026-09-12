@@ -29,6 +29,7 @@ export interface ClientFormValues {
   treatmentGoals: string
   referralSource: string
   generalNotes: string
+  dateAdded: string
   status: ClientStatus
 }
 
@@ -48,6 +49,7 @@ function toFormValues(client?: Client): ClientFormValues {
     treatmentGoals: client?.treatmentGoals ?? "",
     referralSource: client?.referralSource ?? "",
     generalNotes: client?.generalNotes ?? "",
+    dateAdded: client?.dateAdded ?? new Date().toISOString().slice(0, 10),
     status: client?.status ?? "ACTIVE",
   }
 }
@@ -68,6 +70,7 @@ function toClientInput(values: ClientFormValues): ClientInput {
     treatmentGoals: values.treatmentGoals.trim() || undefined,
     referralSource: values.referralSource.trim() || undefined,
     generalNotes: values.generalNotes.trim() || undefined,
+    dateAdded: values.dateAdded,
     status: values.status,
   }
 }
@@ -104,6 +107,11 @@ export function ClientForm({ initialClient, onSubmit, onCancel }: ClientFormProp
     const next: Partial<Record<keyof ClientFormValues, string>> = {}
     if (!values.fullName.trim()) next.fullName = "Full name is required"
     if (!values.code.trim()) next.code = "Client code is required"
+    if (!values.dateAdded) {
+      next.dateAdded = "Date added is required"
+    } else if (values.dateAdded > new Date().toISOString().slice(0, 10)) {
+      next.dateAdded = "Date added cannot be in the future"
+    }
     if (values.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) {
       next.email = "Enter a valid email address"
     }
@@ -259,9 +267,10 @@ export function ClientForm({ initialClient, onSubmit, onCancel }: ClientFormProp
             <Input
               label="Date Added"
               type="date"
-              value={initialClient?.dateAdded ?? new Date().toISOString().slice(0, 10)}
-              disabled
-              hint={initialClient ? "Set automatically on creation" : "Today's date"}
+              value={values.dateAdded}
+              max={new Date().toISOString().slice(0, 10)}
+              onChange={(e) => set("dateAdded", e.target.value)}
+              hint="When this client was added"
             />
             <Select
               label="Status"

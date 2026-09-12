@@ -31,10 +31,7 @@ export class FirestoreClientRepository implements ClientRepository {
   }
 
   async createClient(input: ClientInput): Promise<Client> {
-    const data = {
-      ...stripUndefined(input),
-      dateAdded: new Date().toISOString().slice(0, 10),
-    }
+    const data = stripUndefined(input)
     const ref = await addDoc(collection(db(), "clients"), data)
     return mapDoc<Client>(data, ref.id)
   }

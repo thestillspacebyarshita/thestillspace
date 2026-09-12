@@ -39,5 +39,6 @@ export interface ClientInput {
   referralSource?: string
   generalNotes?: string
 
+  dateAdded: string
   status: ClientStatus
 }

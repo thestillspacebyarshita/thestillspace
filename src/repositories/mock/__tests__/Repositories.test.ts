@@ -15,6 +15,7 @@ describe("MockClientRepository", () => {
     const created = await mockClientRepository.createClient({
       code: "C-TEST-001",
       fullName: "Test Person",
+      dateAdded: "2026-09-12",
       status: "ACTIVE",
     })
     expect(created.id).toBeDefined()
@@ -25,6 +26,7 @@ describe("MockClientRepository", () => {
     const updated = await mockClientRepository.updateClient(created.id, {
       code: "C-TEST-001",
       fullName: "Test Person Renamed",
+      dateAdded: "2026-09-12",
       status: "INACTIVE",
     })
     expect(updated.fullName).toBe("Test Person Renamed")
