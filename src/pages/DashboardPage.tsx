@@ -8,6 +8,7 @@ import {
 import { LoadingScreen } from "@/components/LoadingScreen"
 import { ErrorState } from "@/components/ErrorState"
 import { formatDate } from "@/lib/format"
+import { effectiveFollowUpStatus } from "@/lib/followUps"
 
 function currentMonthPrefix(): string {
   const now = new Date()
@@ -28,7 +29,7 @@ export function DashboardPage() {
   const activeClients = clients.filter((c) => c.status === "ACTIVE").length
   const monthPrefix = currentMonthPrefix()
   const sessionsThisMonth = sessions.filter((s) => s.date.startsWith(monthPrefix)).length
-  const upcomingFollowUps = followUps.filter((f) => f.status === "Upcoming").length
+  const upcomingFollowUps = followUps.filter((f) => effectiveFollowUpStatus(f.status, f.date) === "Upcoming").length
   const totalClients = clients.length
 
   const latestSessions = [...sessions]

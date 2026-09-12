@@ -4,13 +4,24 @@ import { useData } from "@/contexts/DataContext"
 import { SessionForm } from "@/components/sessions/SessionForm"
 import { LoadingScreen } from "@/components/LoadingScreen"
 import { ErrorState } from "@/components/ErrorState"
+import { effectiveFollowUpStatus } from "@/lib/followUps"
 import type { SessionInput } from "@/types/session"
 
 export function SessionFormPage({ mode }: { mode: "new" | "edit" }) {
   const { sessionId } = useParams<{ sessionId: string }>()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { clients, sessions, loading, createSession, updateSession, createFollowUp } = useData()
+  const {
+    clients,
+    sessions,
+    followUps,
+    loading,
+    createSession,
+    updateSession,
+    createFollowUp,
+    updateFollowUp,
+    deleteFollowUp,
+  } = useData()
   const [submitError, setSubmitError] = useState<string | null>(null)
 
   const session = mode === "edit" ? sessions.find((s) => s.id === sessionId) : undefined
@@ -32,6 +43,26 @@ export function SessionFormPage({ mode }: { mode: "new" | "edit" }) {
     try {
       if (isEditing && sessionId) {
         await updateSession(sessionId, input)
+        const existingFollowUp = followUps.find((f) => f.sessionId === sessionId)
+        if (input.followUpDate) {
+          const followUpInput = {
+            clientId: input.clientId,
+            sessionId,
+            date: input.followUpDate,
+            reason: existingFollowUp?.reason ?? `Follow-up after "${input.title}"`,
+            status: effectiveFollowUpStatus(
+              existingFollowUp?.status ?? "Upcoming",
+              input.followUpDate,
+            ),
+          }
+          if (existingFollowUp) {
+            await updateFollowUp(existingFollowUp.id, followUpInput)
+          } else {
+            await createFollowUp(followUpInput)
+          }
+        } else if (existingFollowUp) {
+          await deleteFollowUp(existingFollowUp.id)
+        }
         navigate(`/sessions/${sessionId}`)
       } else {
         const created = await createSession(input)
@@ -41,7 +72,7 @@ export function SessionFormPage({ mode }: { mode: "new" | "edit" }) {
             sessionId: created.id,
             date: input.followUpDate,
             reason: `Follow-up after "${input.title}"`,
-            status: "Upcoming",
+            status: effectiveFollowUpStatus("Upcoming", input.followUpDate),
           })
         }
         navigate(preselectedClientId ? `/clients/${preselectedClientId}` : "/sessions")

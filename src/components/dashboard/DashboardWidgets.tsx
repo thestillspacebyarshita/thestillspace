@@ -3,6 +3,7 @@ import { useData } from "@/contexts/DataContext"
 import { Card, CardBody, CardHeader } from "@/components/ui/Card"
 import { EmptyState } from "@/components/EmptyState"
 import { formatDate, formatDuration } from "@/lib/format"
+import { effectiveFollowUpStatus } from "@/lib/followUps"
 import type { Client, FollowUp, Session } from "@/types"
 
 export function RecentSessions() {
@@ -67,7 +68,7 @@ export function UpcomingFollowUps() {
   const clientName = (id: string) => clients.find((c) => c.id === id)?.fullName ?? "Unknown"
 
   const upcoming = followUps
-    .filter((f: FollowUp) => f.status === "Upcoming")
+    .filter((f: FollowUp) => effectiveFollowUpStatus(f.status, f.date) === "Upcoming")
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(0, 5)
 

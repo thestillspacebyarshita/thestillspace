@@ -9,6 +9,7 @@ import { LoadingScreen } from "@/components/LoadingScreen"
 import { ErrorState } from "@/components/ErrorState"
 import { EmptyState } from "@/components/EmptyState"
 import { calculateAge, formatDate } from "@/lib/format"
+import { effectiveFollowUpStatus } from "@/lib/followUps"
 
 type SortKey = "name" | "dateAdded" | "code"
 
@@ -59,10 +60,13 @@ export function ClientsPage() {
   }
 
   const nextFollowUpDate = (clientId: string): string | null => {
-    const upcoming = followUps
-      .filter((f) => f.clientId === clientId && f.status === "Upcoming")
+    const next = followUps
+      .filter(
+        (f) =>
+          f.clientId === clientId && effectiveFollowUpStatus(f.status, f.date) !== "Completed",
+      )
       .sort((a, b) => a.date.localeCompare(b.date))
-    return upcoming[0]?.date ?? null
+    return next[0]?.date ?? null
   }
 
   if (loading) return <LoadingScreen label="Loading clients…" />
