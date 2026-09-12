@@ -60,13 +60,12 @@ export function ClientsPage() {
   }
 
   const nextFollowUpDate = (clientId: string): string | null => {
-    const next = followUps
+    const upcoming = followUps
       .filter(
-        (f) =>
-          f.clientId === clientId && effectiveFollowUpStatus(f.status, f.date) !== "Completed",
+        (f) => f.clientId === clientId && effectiveFollowUpStatus(f.status, f.date) === "Upcoming",
       )
       .sort((a, b) => a.date.localeCompare(b.date))
-    return next[0]?.date ?? null
+    return upcoming[0]?.date ?? null
   }
 
   if (loading) return <LoadingScreen label="Loading clients…" />
