@@ -25,7 +25,11 @@ interface AuthContextValue {
 
 const DEMO_STORAGE_KEY = "sessionnotes_demo_user"
 
-const OWNER_EMAIL = import.meta.env.VITE_OWNER_EMAIL
+const ownerEmailRaw = import.meta.env.VITE_OWNER_EMAIL as string | undefined
+const OWNER_EMAILS = (ownerEmailRaw ?? "")
+  .split(",")
+  .map((email: string) => email.trim().toLowerCase())
+  .filter((email: string) => email.length > 0)
 
 export class OwnerOnlyError extends Error {
   constructor(message: string) {
@@ -41,8 +45,8 @@ function isFirebaseConfigured(): boolean {
 }
 
 function isOwner(user: { email: string | null }): boolean {
-  if (!OWNER_EMAIL || !user.email) return false
-  return user.email.toLowerCase() === OWNER_EMAIL.toLowerCase()
+  if (OWNER_EMAILS.length === 0 || !user.email) return false
+  return OWNER_EMAILS.includes(user.email.toLowerCase())
 }
 
 function readDemoUser(): AuthUser | null {
